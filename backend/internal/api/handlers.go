@@ -26,7 +26,6 @@ func (h *Handlers) Healthz(w http.ResponseWriter, _ *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
 }
 
-
 func (h *Handlers) Operations(w http.ResponseWriter, _ *http.Request) {
 	operations := h.registry.List()
 	infos := make([]OperationInfo, len(operations))
@@ -39,8 +38,6 @@ func (h *Handlers) Operations(w http.ResponseWriter, _ *http.Request) {
 	}
 	writeJSON(w, http.StatusOK, OperationsResponse{Operations: infos})
 }
-
-
 
 func (h *Handlers) Calculate(w http.ResponseWriter, r *http.Request) {
 	contentType, _, contentTypeError := mime.ParseMediaType(r.Header.Get("Content-Type"))
@@ -99,8 +96,6 @@ func (h *Handlers) Calculate(w http.ResponseWriter, r *http.Request) {
 	}
 	writeJSON(w, http.StatusOK, CalculateResponse{Result: result})
 }
-
-
 
 func writeDomainError(w http.ResponseWriter, err error) {
 	switch {
