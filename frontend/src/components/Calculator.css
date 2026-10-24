@@ -1,0 +1,150 @@
+.calculator-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 2rem 1rem;
+  background: radial-gradient(circle at top, #eadff2 0, #d8c9e3 55%, #c9b5d8 100%);
+}
+
+.calculator {
+  width: min(100%, 31rem);
+  padding: clamp(1.1rem, 4vw, 2rem);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 2rem;
+  background: #251532;
+  box-shadow: 0 1.5rem 3rem rgba(38, 17, 51, 0.25);
+}
+
+.calculator-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.calculator-header h1 {
+  margin: 0;
+  font-size: clamp(1.5rem, 5vw, 2rem);
+}
+
+.eyebrow {
+  margin: 0;
+  color: #cbb0df;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+}
+
+.display {
+  min-height: 5rem;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  overflow-wrap: anywhere;
+  margin: 1.25rem 0;
+  padding: 0.75rem 1rem;
+  border: 2px solid #120a1a;
+  border-radius: 0.5rem;
+  background: #4e2d65;
+  color: #ffd84a;
+  font-size: clamp(2rem, 8vw, 3rem);
+  font-weight: 700;
+}
+
+.inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.inputs label {
+  display: grid;
+  gap: 0.35rem;
+  color: #d8c8e3;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.inputs input {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid #7b5592;
+  border-radius: 0.55rem;
+  padding: 0.65rem;
+  background: #382047;
+  color: #fff;
+  outline: none;
+}
+
+.inputs input:focus-visible,
+button:focus-visible {
+  outline: 3px solid #ffd84a;
+  outline-offset: 2px;
+}
+
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: clamp(0.5rem, 2vw, 0.8rem);
+}
+
+.keypad button {
+  min-height: 4.2rem;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 0.75rem;
+  background: #684184;
+  color: #ffd84a;
+  cursor: pointer;
+  font-size: clamp(1.4rem, 5vw, 2rem);
+  font-weight: 800;
+  transition: transform 120ms ease, background 120ms ease;
+}
+
+.keypad button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  background: #7f51a0;
+}
+
+.keypad button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.keypad button span {
+  color: #e5d8eb;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.keypad .clear-button {
+  background: #ad5874;
+}
+
+.error-message {
+  margin: 1rem 0 0;
+  padding: 0.75rem 1rem;
+  border-left: 4px solid #ffb7c9;
+  border-radius: 0.4rem;
+  background: #51223b;
+  color: #ffe8ee;
+  line-height: 1.4;
+}
+
+@media (max-width: 420px) {
+  .calculator-page {
+    padding: 0.75rem;
+  }
+
+  .calculator {
+    border-radius: 1.25rem;
+  }
+
+  .keypad button {
+    min-height: 3.5rem;
+  }
+}
