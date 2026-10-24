@@ -1,4 +1,5 @@
 package calculator
+
 type Subtract struct{}
 
 func (Subtract) Name() string { return "subtract" }
