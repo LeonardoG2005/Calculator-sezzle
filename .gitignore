@@ -1,0 +1,19 @@
+# Local environment files
+.env
+.env.*
+!.env.example
+
+# Go
+backend/coverage.out
+backend/bin/
+
+# Node
+frontend/node_modules/
+frontend/dist/
+frontend/coverage/
+
+# Editor and operating system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
