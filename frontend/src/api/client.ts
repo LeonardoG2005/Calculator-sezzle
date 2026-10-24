@@ -25,7 +25,12 @@ export async function calculate(
     throw new Error("The calculator service is unavailable. Start the backend and try again.");
   }
 
-  const payload = (await response.json()) as CalculateResponse & ErrorResponse;
+  let payload: CalculateResponse & ErrorResponse;
+  try {
+    payload = (await response.json()) as CalculateResponse & ErrorResponse;
+  } catch {
+    throw new Error("The calculator service returned an invalid response. Try again.");
+  }
   if (!response.ok) {
     throw new Error(payload.error?.message ?? "The calculation could not be completed.");
   }

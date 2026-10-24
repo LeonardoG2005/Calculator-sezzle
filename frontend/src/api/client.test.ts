@@ -22,4 +22,11 @@ describe("calculate", () => {
     );
     await expect(calculate("divide", [2, 0])).rejects.toThrow("division by zero");
   });
+
+  it("handles a non-JSON backend response", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response("<html>server error</html>", { status: 502 }),
+    );
+    await expect(calculate("add", [2, 3])).rejects.toThrow("invalid response");
+  });
 });
