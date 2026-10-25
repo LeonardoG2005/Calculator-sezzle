@@ -1,13 +1,17 @@
 .calculator-page {
   min-height: 100vh;
+  width: 100%;
+  min-width: 0;
   display: grid;
   place-items: center;
   padding: 1.5rem;
   background: #cbb9d8;
+  overflow-x: hidden;
 }
 
 .calculator {
   width: min(100%, 25rem);
+  min-width: 0;
   padding: 1.1rem;
   border: 4px solid #100817;
   border-radius: 1rem;
@@ -16,6 +20,8 @@
 }
 
 .display {
+  width: 100%;
+  min-width: 0;
   min-height: 5.3rem;
   display: flex;
   flex-direction: column;
@@ -32,14 +38,23 @@
 }
 
 .display .expression {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   min-height: 1rem;
   color: #d5b1e4;
   font-size: 0.7rem;
 }
 
 .display strong {
+  min-width: 0;
+  width: 100%;
   max-width: 100%;
-  overflow-wrap: anywhere;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: clamp(2.3rem, 11vw, 3.2rem);
   line-height: 1;
   text-shadow: 2px 2px 0 #a94f70;

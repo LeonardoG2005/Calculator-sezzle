@@ -16,9 +16,10 @@ The application supports:
 * Square root
 * Percentage
 
-The interface is centered, keyboard friendly, responsive, and usable on small
-screens. Backend failures and invalid input are shown as readable messages
-instead of raw network errors.
+The interface is centered, responsive, and usable on small screens. Input is
+entered through the on-screen keypad; physical keyboard input is not supported.
+Backend failures and invalid input are shown as readable messages instead of
+raw network errors.
 
 ## Requirements
 
@@ -44,7 +45,7 @@ application and the REST API from the same origin. Stop the container with:
 docker compose down
 ```
 
-## Run locally
+## Run without Docker
 
 ### Backend
 
@@ -250,7 +251,7 @@ requests. Division by zero and invalid mathematical domains return HTTP 422.
 | `REQUEST_TOO_LARGE` | 413 | The request body exceeds the size limit |
 | `DIVISION_BY_ZERO` | 422 | The divisor is zero |
 | `MATH_DOMAIN_ERROR` | 422 | The operation is undefined for the operands |
-| `RESULT_OUT_OF_RANGE` | 422 | The result is not finite |
+| `RESULT_OUT_OF_RANGE` | 422 | The result cannot be represented in the supported numeric range |
 
 ## Testing and coverage
 
@@ -282,32 +283,69 @@ The latest command output is kept in:
 * [Backend coverage](coverage-report/backend.txt)
 * [Frontend coverage](coverage-report/frontend.txt)
 
+Current snapshot:
+
+* Backend: 84.3% in the API package and 97.9% in the calculator package,
+  91.1% simple average across the two tested internal packages.
+* Frontend: 78.21% statements, 66.03% branches, and 68.75% functions.
+
 The reports are snapshots of the local test commands and can be regenerated
 when the implementation changes.
 
 ## Design decisions and assumptions
 
-The backend uses a small operation registry. Each operation is a pure strategy
-with an explicit arity, so adding an operation does not require changing the
-HTTP handler.
+* The backend uses a small operation registry. Each operation is a pure
+  strategy with an explicit arity, so adding an operation does not require
+  changing the HTTP handler.
+* Mathematical rules live in the calculator package, while HTTP parsing,
+  status codes, and JSON responses live in the API package. This keeps the
+  domain logic independently testable.
+* The frontend uses a small API client instead of performing calculations in
+  the browser. The backend is the source of truth for validation and results.
+* The API uses one calculation endpoint with operation names and an operand
+  array. This keeps the contract consistent across basic and advanced
+  operations.
+* Errors use stable machine readable codes and human readable messages. The
+  frontend can show a useful message without depending on a particular HTTP
+  status text.
+* The interface uses semantic buttons, visible focus styles, labels, live
+  result announcements, and a responsive grid. The layout does not depend on
+  absolute positioning or a particular screen size.
+* The backend can serve the built frontend from the same process. This keeps
+  the Docker deployment small and avoids a separate production web server for
+  this application.
+* Percentage means `first * second / 100`. Square root accepts one operand.
+  Exponentiation and all basic operations accept two operands.
+* Results are rounded only for display in the frontend. The API returns the
+  calculated number without applying presentation formatting.
+* Very large or very small finite results are displayed in scientific notation
+  in the frontend. For example, `100 ^ 100` is shown as approximately
+  `1e+200`; this is a display choice, not an error.
 
-The frontend keeps presentation in React components and network behavior in a
-small API client. Input validation happens before a request is sent, while the
-backend remains the source of truth for mathematical validation.
+## Known limitations
 
-The visual design uses a compact pixel inspired calculator with a dark body,
-purple controls, a violet background, and a bright yellow display. The keypad
-keeps a four column layout on larger screens and scales down on small screens.
-Inputs remain visible and labeled because the required operations need one or
-two operands. No calculation depends on button position or screen size.
-
-Percentage means `first * second / 100`. Square root accepts one operand.
-Exponentiation and all basic operations accept two operands. Results are
-rounded for display only, while the backend returns the calculated number.
+* The frontend requires the backend to be running for calculations. It shows a
+  message in the display when the API cannot be reached, but it does not queue
+  requests for later.
+* The interface currently supports one pending binary operation at a time. It
+  is not intended to parse complete mathematical expressions with precedence
+  and parentheses.
+* The calculator sends one request for each completed operation. It does not
+  provide an offline mode or calculate locally when the service is unavailable.
+* Results and expressions are intentionally compact. Very long values may be
+  shortened visually on narrow screens.
+* JavaScript, JSON, and the Go API use floating point numbers, so extremely
+  large results can be approximate even when they are mathematically finite.
+  Values beyond the supported floating point range are rejected by the backend
+  with `RESULT_OUT_OF_RANGE`. This means the value cannot be represented by
+  this service, not that the mathematical result is undefined.
+* The Docker image uses npm during its frontend build, while local development
+  supports both npm and pnpm.
 
 ## Git workflow
 
 Feature work is pushed to a feature branch and integrated into `main` through a
 pull request. Commits use English messages with Gitmoji prefix.
 
-GitHub Copilot was used as an assistant for mechanical implementation tasks. The prompts used during the development session are documented in PROMPTS_AI.md.
+GitHub Copilot was used as an assistant for mechanical implementation tasks.
+The prompts used during development are documented in [AI_PROMPTS.md](AI_PROMPTS.md).

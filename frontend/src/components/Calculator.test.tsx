@@ -33,6 +33,45 @@ describe("Calculator", () => {
     fireEvent.click(screen.getByRole("button", { name: "√" }));
 
     await waitFor(() => expect(calculate).toHaveBeenCalledWith("sqrt", [16]));
+    expect(screen.getByLabelText("Calculation result")).toHaveTextContent("√ 16 =4");
+  });
+
+  it("uses scientific notation for very large results", async () => {
+    vi.mocked(calculate).mockResolvedValue(1e200);
+    render(<Calculator />);
+
+    fireEvent.click(screen.getByRole("button", { name: "1" }));
+    fireEvent.click(screen.getByRole("button", { name: "0" }));
+    fireEvent.click(screen.getByRole("button", { name: "0" }));
+    fireEvent.click(screen.getByRole("button", { name: "xʸ" }));
+    fireEvent.click(screen.getByRole("button", { name: "1" }));
+    fireEvent.click(screen.getByRole("button", { name: "0" }));
+    fireEvent.click(screen.getByRole("button", { name: "0" }));
+    fireEvent.click(screen.getByRole("button", { name: "equals" }));
+
+    await waitFor(() => expect(calculate).toHaveBeenCalledWith("power", [100, 100]));
+    expect(screen.getByLabelText("Calculation result")).toHaveTextContent("1e+200");
+  });
+
+  it("starts a valid number when editing a scientific result", async () => {
+    vi.mocked(calculate)
+      .mockResolvedValueOnce(1e30)
+      .mockResolvedValueOnce(2);
+    render(<Calculator />);
+
+    fireEvent.click(screen.getByRole("button", { name: "1" }));
+    fireEvent.click(screen.getByRole("button", { name: "+" }));
+    fireEvent.click(screen.getByRole("button", { name: "1" }));
+    fireEvent.click(screen.getByRole("button", { name: "equals" }));
+    await waitFor(() => expect(screen.getByLabelText("Calculation result")).toHaveTextContent("1e+30"));
+
+    fireEvent.click(screen.getByRole("button", { name: "◀" }));
+    fireEvent.click(screen.getByRole("button", { name: "1" }));
+    fireEvent.click(screen.getByRole("button", { name: "+" }));
+    fireEvent.click(screen.getByRole("button", { name: "1" }));
+    fireEvent.click(screen.getByRole("button", { name: "equals" }));
+
+    await waitFor(() => expect(calculate).toHaveBeenLastCalledWith("add", [1, 1]));
   });
 
 });

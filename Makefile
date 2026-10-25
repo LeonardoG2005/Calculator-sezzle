@@ -38,10 +38,10 @@ lint-frontend:
 coverage: coverage-backend coverage-frontend
 
 coverage-backend:
-	cd backend && go test ./... -cover | tee ../coverage-report/backend.txt
+	cd backend && go test ./... -cover > ../coverage-report/backend.txt
 
 coverage-frontend:
-	cd frontend && $(PACKAGE_MANAGER) run test:coverage | tee ../coverage-report/frontend.txt
+	cd frontend && $(PACKAGE_MANAGER) run test:coverage -- --no-color > ../coverage-report/frontend.txt
 
 docker-build:
 	docker compose build

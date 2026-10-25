@@ -53,12 +53,18 @@ export function Calculator() {
 
   function appendDigit(digit: string) {
     setError("");
-    setDisplay((current) => (current === "0" ? digit : current + digit));
+    setDisplay((current) => (
+      current === "0" || isScientificNotation(current) ? digit : current + digit
+    ));
   }
 
   function appendDecimal() {
     setError("");
-    setDisplay((current) => (current.includes(".") ? current : `${current}.`));
+    setDisplay((current) => (
+      isScientificNotation(current)
+        ? "0."
+        : current.includes(".") ? current : `${current}.`
+    ));
   }
 
   function clear() {
@@ -71,7 +77,11 @@ export function Calculator() {
 
   function backspace() {
     setError("");
-    setDisplay((current) => (current.length > 1 ? current.slice(0, -1) : "0"));
+    setDisplay((current) => (
+      isScientificNotation(current)
+        ? "0"
+        : current.length > 1 ? current.slice(0, -1) : "0"
+    ));
   }
 
   function chooseOperation(operation: OperationName) {
@@ -116,7 +126,7 @@ export function Calculator() {
     try {
       const value = await calculate(operation, operands);
       setDisplay(formatResult(value));
-      setExpression(`${formatResult(operands[0])} ${symbolFor(operation)} ${operands[1] ?? ""}`);
+      setExpression(formatExpression(operation, operands));
       setStoredValue(null);
       setPendingOperation(null);
     } catch (calculationError) {
@@ -179,6 +189,21 @@ function symbolFor(operation: OperationName): string {
   return { add: "+", subtract: "−", multiply: "×", divide: "÷", power: "xʸ", percentage: "%", sqrt: "√" }[operation];
 }
 
+function formatExpression(operation: OperationName, operands: number[]): string {
+  if (operation === "sqrt") {
+    return `√ ${formatResult(operands[0])} =`;
+  }
+  return `${formatResult(operands[0])} ${symbolFor(operation)} ${formatResult(operands[1])} =`;
+}
+
 function formatResult(value: number): string {
+  const magnitude = Math.abs(value);
+  if (magnitude >= 1e12 || (magnitude > 0 && magnitude < 1e-6)) {
+    return value.toExponential(4).replace(/\.?0+e/, "e");
+  }
   return Number.isInteger(value) ? String(value) : String(Number(value.toFixed(10)));
+}
+
+function isScientificNotation(value: string): boolean {
+  return value.includes("e") || value.includes("E");
 }
