@@ -21,7 +21,8 @@ func main() {
 	defer stop()
 
 	slog.Info("starting calculator server", "port", port)
-	if err := api.Serve(ctx, ":"+port, calculator.NewDefaultRegistry()); err != nil {
+	staticDir := os.Getenv("STATIC_DIR")
+	if err := api.ServeWithStatic(ctx, ":"+port, calculator.NewDefaultRegistry(), staticDir); err != nil {
 		slog.Error("calculator server stopped with error", "error", err)
 		os.Exit(1)
 	}

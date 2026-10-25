@@ -6,17 +6,40 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"calculator/internal/calculator"
 )
 
 func NewRouter(registry *calculator.Registry) http.Handler {
+	return NewRouterWithStatic(registry, "")
+}
+
+func NewRouterWithStatic(registry *calculator.Registry, staticDir string) http.Handler {
 	handlers := NewHandlers(registry)
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", handlers.Healthz)
 	mux.HandleFunc("GET /api/v1/operations", handlers.Operations)
 	mux.HandleFunc("POST /api/v1/calculate", handlers.Calculate)
+	if staticDir != "" {
+		static := http.FileServer(http.Dir(staticDir))
+		mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			if strings.HasPrefix(r.URL.Path, "/api/") || r.URL.Path == "/healthz" {
+				http.NotFound(w, r)
+				return
+			}
+			relativePath := strings.TrimPrefix(filepath.Clean(r.URL.Path), string(filepath.Separator))
+			filePath := filepath.Join(staticDir, relativePath)
+			if info, err := os.Stat(filePath); err == nil && !info.IsDir() {
+				static.ServeHTTP(w, r)
+				return
+			}
+			http.ServeFile(w, r, filepath.Join(staticDir, "index.html"))
+		})
+	}
 	return withMiddleware(routeErrors(mux))
 }
 
@@ -77,9 +100,17 @@ func withMiddleware(next http.Handler) http.Handler {
 }
 
 func Serve(ctx context.Context, address string, registry *calculator.Registry) error {
+	return serve(ctx, address, registry, "")
+}
+
+func ServeWithStatic(ctx context.Context, address string, registry *calculator.Registry, staticDir string) error {
+	return serve(ctx, address, registry, staticDir)
+}
+
+func serve(ctx context.Context, address string, registry *calculator.Registry, staticDir string) error {
 	server := &http.Server{
 		Addr:              address,
-		Handler:           NewRouter(registry),
+		Handler:           NewRouterWithStatic(registry, staticDir),
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       10 * time.Second,
 		WriteTimeout:      10 * time.Second,
