@@ -5,6 +5,7 @@
 
 # Go
 backend/coverage.out
+backend/coverage/
 backend/bin/
 
 # Node

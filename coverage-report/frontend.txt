@@ -1,0 +1,29 @@
+# Frontend coverage report
+# Generated with: pnpm test:coverage
+
+
+ RUN  v3.2.7 C:/Users/USUARIO/Documents/Calculator-sezzle/frontend
+      Coverage enabled with v8
+
+ ? src/api/client.test.ts (4 tests) 20ms
+ ? src/components/Calculator.test.tsx (2 tests) 451ms
+   ? Calculator > builds a numeric expression and sends it to the backend  336ms
+
+ Test Files  2 passed (2)
+      Tests  6 passed (6)
+   Start at  18:51:48
+   Duration  4.39s (transform 129ms, setup 637ms, collect 620ms, tests 471ms, environment 3.57s, prepare 798ms)
+
+ % Coverage report from v8
+-----------------|---------|----------|---------|---------|---------------------
+File             | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s   
+-----------------|---------|----------|---------|---------|---------------------
+All files        |   77.55 |    65.38 |   66.66 |   77.55 |                     
+ src             |       0 |        0 |       0 |       0 |                     
+  App.tsx        |       0 |        0 |       0 |       0 | 1-5                 
+  main.tsx       |       0 |        0 |       0 |       0 | 1-10                
+ src/api         |     100 |    88.88 |     100 |     100 |                     
+  client.ts      |     100 |    88.88 |     100 |     100 | 35                  
+ src/components  |   80.37 |    63.41 |      75 |   80.37 |                     
+  Calculator.tsx |   80.37 |    63.41 |      75 |   80.37 | ...,123,131-132,146 
+-----------------|---------|----------|---------|---------|---------------------
