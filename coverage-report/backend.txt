@@ -1,0 +1,6 @@
+# Backend coverage report
+# Generated with: go test ./... -cover
+
+	calculator/cmd/server		coverage: 0.0% of statements
+ok  	calculator/internal/api	(cached)	coverage: 84.2% of statements
+ok  	calculator/internal/calculator	1.544s	coverage: 97.9% of statements

@@ -5,12 +5,16 @@
 
 # Go
 backend/coverage.out
+backend/coverage/
 backend/bin/
 
 # Node
 frontend/node_modules/
 frontend/dist/
 frontend/coverage/
+frontend/*.tsbuildinfo
+frontend/vite.config.js
+frontend/vite.config.d.ts
 
 # Editor and operating system files
 .vscode/

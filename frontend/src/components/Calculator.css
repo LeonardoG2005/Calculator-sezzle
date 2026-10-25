@@ -1,0 +1,141 @@
+.calculator-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: #cbb9d8;
+}
+
+.calculator {
+  width: min(100%, 25rem);
+  padding: 1.1rem;
+  border: 4px solid #100817;
+  border-radius: 1rem;
+  background: #24132f;
+  box-shadow: 0.45rem 0.45rem 0 #5d456e, 1rem 1rem 0 rgba(43, 25, 55, 0.18);
+}
+
+.display {
+  min-height: 5.3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0.2rem;
+  overflow: hidden;
+  padding: 0.5rem 0.85rem;
+  border: 3px solid #09050d;
+  background: #4b2b61;
+  color: #ffd83d;
+  font-family: "Courier New", monospace;
+  text-align: right;
+}
+
+.display .expression {
+  min-height: 1rem;
+  color: #d5b1e4;
+  font-size: 0.7rem;
+}
+
+.display strong {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  font-size: clamp(2.3rem, 11vw, 3.2rem);
+  line-height: 1;
+  text-shadow: 2px 2px 0 #a94f70;
+}
+
+.display-error {
+  max-width: 100%;
+  color: #ffd6e2;
+  font-family: "Courier New", monospace;
+  font-size: clamp(0.85rem, 3.5vw, 1.05rem);
+  font-weight: 900;
+  line-height: 1.25;
+  text-align: center;
+  text-shadow: 1px 1px 0 #a94f70;
+}
+
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.65rem;
+  margin-top: 1rem;
+}
+
+.keypad button {
+  min-height: 3.8rem;
+  border: 3px solid #0d0612;
+  border-radius: 0.35rem;
+  background: #342044;
+  color: #ffd83d;
+  cursor: pointer;
+  font-family: "Courier New", monospace;
+  font-size: clamp(1.7rem, 8vw, 2.35rem);
+  font-weight: 900;
+  line-height: 1;
+  box-shadow: 0 0.3rem 0 #8b5ba1;
+  transition: transform 100ms ease, background 100ms ease, box-shadow 100ms ease;
+}
+
+.keypad button:hover:not(:disabled) {
+  background: #4a2c5d;
+}
+
+.keypad button:active:not(:disabled) {
+  transform: translateY(0.22rem);
+  box-shadow: 0 0.08rem 0 #8b5ba1;
+}
+
+.keypad .operation-button,
+.keypad .equals-button {
+  background: #74499a;
+}
+
+.keypad .equals-button {
+  grid-column: 1 / -1;
+}
+
+.keypad .operation-button:hover:not(:disabled),
+.keypad .equals-button:hover:not(:disabled) {
+  background: #8b5ab2;
+}
+
+.keypad .sqrt-button {
+  font-family: Georgia, serif;
+  font-size: clamp(1.85rem, 8vw, 2.45rem);
+  line-height: 0.7;
+  padding-bottom: 0.18rem;
+}
+
+.keypad button:first-child {
+  background: #a84f70;
+}
+
+.keypad button:disabled {
+  cursor: wait;
+  opacity: 0.62;
+}
+
+.keypad button:focus-visible {
+  outline: 3px solid #fff2a6;
+  outline-offset: 2px;
+}
+
+@media (max-width: 420px) {
+  .calculator-page {
+    padding: 0.75rem;
+  }
+
+  .calculator {
+    padding: 0.8rem;
+  }
+
+  .keypad {
+    gap: 0.5rem;
+  }
+
+  .keypad button {
+    min-height: 3.5rem;
+  }
+}

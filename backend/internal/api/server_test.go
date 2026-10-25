@@ -4,6 +4,8 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -72,6 +74,23 @@ func TestServeStartsAndStops(t *testing.T) {
 			}
 		case <-time.After(time.Second):
 			t.Fatal("Serve() did not stop after cancellation")
+		}
+	}
+}
+
+func TestRouterServesStaticFilesAndSPA(t *testing.T) {
+	staticDir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(staticDir, "index.html"), []byte("app"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	handler := NewRouterWithStatic(calculator.NewDefaultRegistry(), staticDir)
+
+	for _, path := range []string{"/", "/history"} {
+		request := httptest.NewRequest(http.MethodGet, path, nil)
+		response := httptest.NewRecorder()
+		handler.ServeHTTP(response, request)
+		if response.Code != http.StatusOK || response.Body.String() != "app" {
+			t.Fatalf("%s: status = %d, body = %q", path, response.Code, response.Body.String())
 		}
 	}
 }

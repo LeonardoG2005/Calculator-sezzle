@@ -3,13 +3,15 @@
 	run-backend run-frontend lint lint-backend lint-frontend \
 	docker-build docker-run
 
+PACKAGE_MANAGER ?= npm
+
 build: build-backend build-frontend
 
 build-backend:
 	cd backend && go build ./...
 
 build-frontend:
-	cd frontend && npm run build
+	cd frontend && $(PACKAGE_MANAGER) run build
 
 test: test-backend test-frontend
 
@@ -17,13 +19,13 @@ test-backend:
 	cd backend && go test ./...
 
 test-frontend:
-	cd frontend && npm run test
+	cd frontend && $(PACKAGE_MANAGER) run test
 
 run-backend:
 	cd backend && go run ./cmd/server
 
 run-frontend:
-	cd frontend && npm run dev
+	cd frontend && $(PACKAGE_MANAGER) run dev
 
 lint: lint-backend lint-frontend
 
@@ -31,15 +33,15 @@ lint-backend:
 	cd backend && go vet ./...
 
 lint-frontend:
-	cd frontend && npm run lint
+	cd frontend && $(PACKAGE_MANAGER) run lint
 
 coverage: coverage-backend coverage-frontend
 
 coverage-backend:
-	cd backend && go test ./... -coverprofile=coverage.out -covermode=atomic && go tool cover -func=coverage.out
+	cd backend && go test ./... -cover | tee ../coverage-report/backend.txt
 
 coverage-frontend:
-	cd frontend && npm run test:coverage
+	cd frontend && $(PACKAGE_MANAGER) run test:coverage | tee ../coverage-report/frontend.txt
 
 docker-build:
 	docker compose build
