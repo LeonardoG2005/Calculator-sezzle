@@ -2,45 +2,123 @@ import { useState } from "react";
 import { calculate, type OperationName } from "../api/client";
 import "./Calculator.css";
 
-type BinaryOperation = Exclude<OperationName, "sqrt">;
+type ButtonItem =
+  | { kind: "action"; label: string; operation: OperationName }
+  | { kind: "digit"; label: string }
+  | { kind: "decimal"; label: string }
+  | { kind: "clear"; label: string }
+  | { kind: "backspace"; label: string }
+  | { kind: "equals"; label: string };
 
-const operationLabels: Record<OperationName, string> = {
-  add: "+",
-  subtract: "−",
-  multiply: "×",
-  divide: "÷",
-  power: "xʸ",
-  sqrt: "√",
-  percentage: "%",
-};
-
-const binaryOperations: Array<{ operation: BinaryOperation; label: string }> = [
-  { operation: "add", label: operationLabels.add },
-  { operation: "subtract", label: operationLabels.subtract },
-  { operation: "multiply", label: operationLabels.multiply },
-  { operation: "divide", label: operationLabels.divide },
-  { operation: "power", label: operationLabels.power },
-  { operation: "percentage", label: operationLabels.percentage },
+const keypad: ButtonItem[][] = [
+  [
+    { kind: "clear", label: "C" },
+    { kind: "action", label: "√", operation: "sqrt" },
+    { kind: "action", label: "xʸ", operation: "power" },
+    { kind: "action", label: "%", operation: "percentage" },
+  ],
+  [
+    { kind: "digit", label: "7" },
+    { kind: "digit", label: "8" },
+    { kind: "digit", label: "9" },
+    { kind: "action", label: "÷", operation: "divide" },
+  ],
+  [
+    { kind: "digit", label: "4" },
+    { kind: "digit", label: "5" },
+    { kind: "digit", label: "6" },
+    { kind: "action", label: "×", operation: "multiply" },
+  ],
+  [
+    { kind: "digit", label: "1" },
+    { kind: "digit", label: "2" },
+    { kind: "digit", label: "3" },
+    { kind: "action", label: "−", operation: "subtract" },
+  ],
+  [
+    { kind: "backspace", label: "◀" },
+    { kind: "digit", label: "0" },
+    { kind: "decimal", label: "." },
+    { kind: "action", label: "+", operation: "add" },
+  ],
 ];
 
 export function Calculator() {
-  const [first, setFirst] = useState("");
-  const [second, setSecond] = useState("");
-  const [result, setResult] = useState("0");
+  const [display, setDisplay] = useState("0");
+  const [storedValue, setStoredValue] = useState<number | null>(null);
+  const [pendingOperation, setPendingOperation] = useState<OperationName | null>(null);
+  const [expression, setExpression] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function run(operation: OperationName) {
-    const values = operation === "sqrt" ? [first] : [first, second];
-    if (values.some((value) => value.trim() === "" || !Number.isFinite(Number(value)))) {
+  function appendDigit(digit: string) {
+    setError("");
+    setDisplay((current) => (current === "0" ? digit : current + digit));
+  }
+
+  function appendDecimal() {
+    setError("");
+    setDisplay((current) => (current.includes(".") ? current : `${current}.`));
+  }
+
+  function clear() {
+    setDisplay("0");
+    setStoredValue(null);
+    setPendingOperation(null);
+    setExpression("");
+    setError("");
+  }
+
+  function backspace() {
+    setError("");
+    setDisplay((current) => (current.length > 1 ? current.slice(0, -1) : "0"));
+  }
+
+  function chooseOperation(operation: OperationName) {
+    if (operation === "sqrt") {
+      void runCalculation(operation, [Number(display)]);
+      return;
+    }
+    if (operation === "percentage") {
+      if (storedValue === null) {
+        setStoredValue(Number(display));
+        setPendingOperation(operation);
+        setExpression(`${display} %`);
+        setDisplay("0");
+        return;
+      }
+      void runCalculation(operation, [storedValue, Number(display)]);
+      return;
+    }
+    if (operation === "power" || operation === "add" || operation === "subtract" ||
+      operation === "multiply" || operation === "divide") {
+      setStoredValue(Number(display));
+      setPendingOperation(operation);
+      setExpression(`${display} ${symbolFor(operation)}`);
+      setDisplay("0");
+    }
+  }
+
+  function equals() {
+    if (storedValue === null || pendingOperation === null) {
+      return;
+    }
+    void runCalculation(pendingOperation, [storedValue, Number(display)]);
+  }
+
+  async function runCalculation(operation: OperationName, operands: number[]) {
+    if (operands.some((value) => !Number.isFinite(value))) {
       setError("Enter valid numbers before calculating.");
       return;
     }
     setError("");
     setLoading(true);
     try {
-      const value = await calculate(operation, values.map(Number));
-      setResult(formatResult(value));
+      const value = await calculate(operation, operands);
+      setDisplay(formatResult(value));
+      setExpression(`${formatResult(operands[0])} ${symbolFor(operation)} ${operands[1] ?? ""}`);
+      setStoredValue(null);
+      setPendingOperation(null);
     } catch (calculationError) {
       setError(calculationError instanceof Error ? calculationError.message : "Calculation failed.");
     } finally {
@@ -48,51 +126,57 @@ export function Calculator() {
     }
   }
 
-  function clear() {
-    setFirst("");
-    setSecond("");
-    setResult("0");
-    setError("");
+  function handleButton(button: ButtonItem) {
+    if (loading) {
+      return;
+    }
+    if (button.kind === "digit") appendDigit(button.label);
+    if (button.kind === "decimal") appendDecimal();
+    if (button.kind === "clear") clear();
+    if (button.kind === "backspace") backspace();
+    if (button.kind === "equals") equals();
+    if (button.kind === "action") chooseOperation(button.operation);
   }
 
   return (
     <main className="calculator-page">
       <section className="calculator" aria-labelledby="calculator-title">
-        <header className="calculator-header">
-          <p className="eyebrow">SEZZLE</p>
-          <h1 id="calculator-title">Calculator</h1>
-        </header>
         <div className="display" aria-live="polite" aria-label="Calculation result">
-          {loading ? "..." : result}
+          {error ? (
+            <span className="display-error" role="alert">{error}</span>
+          ) : (
+            <>
+              <span className="expression">{expression}</span>
+              <strong>{loading ? "..." : display}</strong>
+            </>
+          )}
         </div>
-        <div className="inputs">
-          <label>
-            <span>First number</span>
-            <input inputMode="decimal" value={first} onChange={(event) => setFirst(event.target.value)} />
-          </label>
-          <label>
-            <span>Second number</span>
-            <input inputMode="decimal" value={second} onChange={(event) => setSecond(event.target.value)} />
-          </label>
-        </div>
-        <div className="keypad" aria-label="Calculator operations">
-          {binaryOperations.map(({ operation, label }) => (
-            <button key={operation} type="button" onClick={() => void run(operation)} disabled={loading}>
-              {label}
-              <span>{operation}</span>
+        <div className="keypad" aria-label="Calculator keypad">
+          {keypad.flat().map((button, index) => (
+            <button
+              key={`${button.kind}-${button.label}-${index}`}
+              className={button.kind === "action"
+                ? `operation-button${button.operation === "sqrt" ? " sqrt-button" : ""}`
+                : ""}
+              type="button"
+              aria-label={button.kind === "equals" ? "equals" : button.label}
+              onClick={() => handleButton(button)}
+              disabled={loading}
+            >
+              {button.label}
             </button>
           ))}
-          <button type="button" onClick={() => void run("sqrt")} disabled={loading}>
-            √<span>sqrt</span>
-          </button>
-          <button type="button" className="clear-button" onClick={clear} disabled={loading}>
-            C<span>clear</span>
+          <button className="equals-button" type="button" aria-label="equals" onClick={equals} disabled={loading}>
+            =
           </button>
         </div>
-        {error && <p className="error-message" role="alert">{error}</p>}
       </section>
     </main>
   );
+}
+
+function symbolFor(operation: OperationName): string {
+  return { add: "+", subtract: "−", multiply: "×", divide: "÷", power: "xʸ", percentage: "%", sqrt: "√" }[operation];
 }
 
 function formatResult(value: number): string {
